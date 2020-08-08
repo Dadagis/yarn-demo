@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
+    "joi": "^17.2.0",
     "mongoose": "^5.9.27",
     "underscore": "^1.10.2"
   }
