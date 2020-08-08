@@ -9,7 +9,13 @@ app.use(express.json());
 
 app.use(logger);
 app.use(helmet());
-app.use(morgan("tiny"));
+
+if (app.get("env") === "development") {
+  console.log("Mogran enabled");
+  app.use(morgan("tiny"));
+}
+
+// 7 configuration
 
 const courses = [
   { id: 1, name: "course 1" },
