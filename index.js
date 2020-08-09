@@ -1,4 +1,14 @@
 require("dotenv").config();
+// const MongoClient = require("mongodb").MongoClient;
+// const uri =
+//   "mongodb+srv://David:Azertyuiop*13@vidly.xwsex.gcp.mongodb.net/Vidly?retryWrites=true&w=majority";
+// const client = new MongoClient(uri, { useUnifiedTopology: true });
+// client.connect((err) => {
+//   const collection = client.db("test").collection("devices");
+//   // perform actions on the collection object
+//   client.close();
+// });
+const mongoose = require("mongoose");
 const startupDebugger = require("debug")("app:startup");
 const config = require("config");
 const helmet = require("helmet");
@@ -9,6 +19,11 @@ const home = require("./routes/home");
 const courses = require("./routes/courses");
 const express = require("express");
 const app = express();
+
+mongoose.connect(`${process.env.URI}`, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+});
 
 app.set("view engine", "pug");
 app.set("views", "./views");
@@ -40,3 +55,25 @@ const validateCourse = (course) => {
 
   return schema.validate(course);
 };
+
+const courseSchema = new mongoose.Schema({
+  name: String,
+  author: String,
+  tags: [String],
+  date: { type: Date, default: Date.now },
+  isPublished: Boolean,
+});
+
+async function createCourse() {
+  const Course = mongoose.model("Course", courseSchema);
+  const course = new Course({
+    name: "Angular course",
+    author: "Mosh",
+    tags: ["Angular", "Frontend"],
+    isPublished: true,
+  });
+  const result = await course.save();
+  console.log(result);
+}
+
+createCourse();
