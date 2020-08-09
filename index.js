@@ -64,8 +64,9 @@ const courseSchema = new mongoose.Schema({
   isPublished: Boolean,
 });
 
+const Course = mongoose.model("Course", courseSchema);
+
 async function createCourse() {
-  const Course = mongoose.model("Course", courseSchema);
   const course = new Course({
     name: "Angular course",
     author: "Mosh",
@@ -76,4 +77,9 @@ async function createCourse() {
   console.log(result);
 }
 
-createCourse();
+async function getCourses() {
+  const courses = await Course.find({ author: "Mosh" });
+  console.log(courses);
+}
+
+getCourses();
