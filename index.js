@@ -1,3 +1,5 @@
+require("dotenv").config();
+const startupDebugger = require("debug")("app:startup");
 const config = require("config");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -16,7 +18,7 @@ app.use(logger);
 app.use(helmet());
 
 if (app.get("env") === "development") {
-  console.log("Mogran enabled");
+  startupDebugger("Mogran enabled");
   app.use(morgan("tiny"));
 }
 
