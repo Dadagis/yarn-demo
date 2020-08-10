@@ -57,11 +57,17 @@ const validateCourse = (course) => {
 };
 
 const courseSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, required: true, minlength: 5 },
   author: String,
   tags: [String],
   date: { type: Date, default: Date.now },
   isPublished: Boolean,
+  price: {
+    type: Number,
+    required: function () {
+      return this.isPublished;
+    },
+  },
 });
 
 const Course = mongoose.model("Course", courseSchema);
@@ -72,9 +78,15 @@ async function createCourse() {
     author: "Mosh",
     tags: ["Angular", "Frontend"],
     isPublished: true,
+    price: 15,
   });
-  const result = await course.save();
-  console.log(result);
+
+  try {
+    const result = await course.save();
+    console.log(result);
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
 async function getCourses() {
@@ -82,4 +94,35 @@ async function getCourses() {
   console.log(courses);
 }
 
+async function updateCourse(id) {
+  const course = await Course.findById(id);
+  if (!course) return;
+  course.isPublished = true;
+  course.author = "Another author";
+
+  const result = await course.save();
+  console.log(result);
+}
+
+// Update directly in the database example :
+
+async function updateCourseExample(id) {
+  // or findByIdAndUpdate to get the updated object with the option {new: true}
+  const result = await Course.update(
+    { _id: id },
+    { $set: { author: "Mosh", isPublished: false } }
+  );
+
+  console.log(result);
+}
+
+async function removeDocument(id) {
+  // or deleteMany
+  const result = await Course.deleteOne({ _id: id });
+  console.log(result);
+}
+
+// createCourse();
 getCourses();
+// updateCourse("5f2ff09662baf9184026e802");
+// removeDocument("5f2ff09662baf9184026e802");
