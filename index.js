@@ -13,7 +13,6 @@ const startupDebugger = require("debug")("app:startup");
 const config = require("config");
 const helmet = require("helmet");
 const morgan = require("morgan");
-const Joi = require("joi");
 const logger = require("./middleware/logger");
 const home = require("./routes/home");
 const courses = require("./routes/courses");
@@ -21,10 +20,13 @@ const express = require("express");
 const app = express();
 
 // mongoDb connect
-mongoose.connect(`${process.env.URI}`, {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-});
+mongoose
+  .connect(`${process.env.URI}`, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+  })
+  .then(() => console.log("Connected to MongoDb"))
+  .catch(() => console.log("Could not connect to DataBase"));
 
 // PUG
 app.set("view engine", "pug");
@@ -51,89 +53,82 @@ if (app.get("env") === "development") {
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
-const validateCourse = (course) => {
-  const schema = Joi.object({
-    name: Joi.string().min(3).required(),
-  });
+// DB Test
+// const courseSchema = new mongoose.Schema({
+//   name: { type: String, required: true, minlength: 5 },
+//   author: String,
+//   tags: {
+//     type: Array,
+//     validate: {
+//       validator: function (v) {
+//         return v && v.length > 0;
+//       },
+//       message: "A course should have at laeast one tag",
+//     },
+//   },
+//   date: { type: Date, default: Date.now },
+//   isPublished: Boolean,
+//   price: {
+//     type: Number,
+//     required: function () {
+//       return this.isPublished;
+//     },
+//   },
+// });
 
-  return schema.validate(course);
-};
+// const Course = mongoose.model("Course", courseSchema);
 
-const courseSchema = new mongoose.Schema({
-  name: { type: String, required: true, minlength: 5 },
-  author: String,
-  tags: {
-    type: Array,
-    validate: {
-      validator: function (v) {
-        return v && v.length > 0;
-      },
-      message: "A course should have at laeast one tag",
-    },
-  },
-  date: { type: Date, default: Date.now },
-  isPublished: Boolean,
-  price: {
-    type: Number,
-    required: function () {
-      return this.isPublished;
-    },
-  },
-});
+// async function createCourse() {
+//   const course = new Course({
+//     name: "Angular course",
+//     author: "Mosh",
+//     tags: ["Angular", "Frontend"],
+//     isPublished: true,
+//     price: 15,
+//   });
 
-const Course = mongoose.model("Course", courseSchema);
+//   try {
+//     const result = await course.save();
+//     console.log(result);
+//   } catch (error) {
+//     console.log(error.message);
+//   }
+// }
 
-async function createCourse() {
-  const course = new Course({
-    name: "Angular course",
-    author: "Mosh",
-    tags: ["Angular", "Frontend"],
-    isPublished: true,
-    price: 15,
-  });
+// async function getCourses() {
+//   const courses = await Course.find({ author: "Mosh" });
+//   console.log(courses);
+// }
 
-  try {
-    const result = await course.save();
-    console.log(result);
-  } catch (error) {
-    console.log(error.message);
-  }
-}
+// async function updateCourse(id) {
+//   const course = await Course.findById(id);
+//   if (!course) return;
+//   course.isPublished = true;
+//   course.author = "Another author";
 
-async function getCourses() {
-  const courses = await Course.find({ author: "Mosh" });
-  console.log(courses);
-}
+//   const result = await course.save();
+//   console.log(result);
+// }
 
-async function updateCourse(id) {
-  const course = await Course.findById(id);
-  if (!course) return;
-  course.isPublished = true;
-  course.author = "Another author";
+// // Update directly in the database example :
 
-  const result = await course.save();
-  console.log(result);
-}
+// async function updateCourseExample(id) {
+//   // or findByIdAndUpdate to get the updated object with the option {new: true}
+//   const result = await Course.update(
+//     { _id: id },
+//     { $set: { author: "Mosh", isPublished: false } }
+//   );
 
-// Update directly in the database example :
+//   console.log(result);
+// }
 
-async function updateCourseExample(id) {
-  // or findByIdAndUpdate to get the updated object with the option {new: true}
-  const result = await Course.update(
-    { _id: id },
-    { $set: { author: "Mosh", isPublished: false } }
-  );
+// async function removeDocument(id) {
+//   // or deleteMany
+//   const result = await Course.deleteOne({ _id: id });
+//   console.log(result);
+// }
 
-  console.log(result);
-}
-
-async function removeDocument(id) {
-  // or deleteMany
-  const result = await Course.deleteOne({ _id: id });
-  console.log(result);
-}
-
-createCourse();
+// createCourse();
 // getCourses();
 // updateCourse("5f2ff09662baf9184026e802");
 // removeDocument("5f2ff09662baf9184026e802");

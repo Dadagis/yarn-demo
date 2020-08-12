@@ -1,18 +1,42 @@
+const mongoose = require("mongoose");
 const express = require("express");
+const Joi = require("joi");
 const router = express.Router();
 
-const courses = [
-  { id: 1, name: "course 1" },
-  { id: 2, name: "course 2" },
-  { id: 3, name: "course 3" },
-];
+// OLD "schema"
+// const courses = [
+//   { id: 1, name: "course 1" },
+//   { id: 2, name: "course 2" },
+//   { id: 3, name: "course 3" },
+// ];
 
-router.get("/", (req, res) => {
+const lessonSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    minlength: 5,
+    maxlength: 50,
+  },
+});
+
+const Course = mongoose.model("Lesson", lessonSchema);
+
+router.get("/", async (req, res) => {
+  const courses = await Course.find().sort("name");
   res.send(courses);
 });
 
-router.get("/:id", (req, res) => {
-  const course = courses.find((c) => c.id === parseInt(req.params.id));
+const validateCourse = (course) => {
+  const schema = Joi.object({
+    name: Joi.string().min(3).required(),
+  });
+
+  return schema.validate(course);
+};
+
+router.get("/:id", async (req, res) => {
+  // const course = courses.find((c) => c.id === parseInt(req.params.id));
+  const course = await Course.findById(req.params.id);
   if (!course) {
     res.status(404).send("The course with the given ID was not found !");
   } else {
@@ -20,7 +44,7 @@ router.get("/:id", (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const { error } = validateCourse(req.body);
 
   if (error) {
@@ -32,16 +56,21 @@ router.post("/", (req, res) => {
     return;
   }
 
-  const course = {
-    id: courses.length + 1,
+  const course = new Course({
     name: req.body.name,
-  };
-  courses.push(course);
-  res.send(course);
+  });
+
+  try {
+    const result = await course.save();
+    res.send(result);
+  } catch (error) {
+    console.log(error.message);
+  }
 });
 
-router.put("/:id", (req, res) => {
-  const course = courses.find((c) => c.id === parseInt(req.params.id));
+router.put("/:id", async (req, res) => {
+  // const course = courses.find((c) => c.id === parseInt(req.params.id));
+  const course = await Course.findById(req.params.id);
   if (!course) {
     res.status(404).send("The course with the given ID was not found");
     return;
@@ -57,20 +86,21 @@ router.put("/:id", (req, res) => {
       );
     return;
   }
-
   course.name = req.body.name;
-  res.send(course);
+  const result = await course.save();
+  res.send(result);
 });
 
-router.delete("/:id", (req, res) => {
-  const course = courses.find((c) => c.id === parseInt(req.params.id));
+router.delete("/:id", async (req, res) => {
+  // const course = courses.find((c) => c.id === parseInt(req.params.id));
+  const course = await Course.findByIdAndRemove(req.params.id);
   if (!course) {
     res.status(404).send("The course with the given ID was not found");
     return;
   }
 
-  const index = courses.indexOf(course);
-  courses.splice(index, 1);
+  // const index = courses.indexOf(course);
+  // courses.splice(index, 1);
 
   res.send(course);
 });
