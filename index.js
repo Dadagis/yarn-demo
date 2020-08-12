@@ -20,14 +20,17 @@ const courses = require("./routes/courses");
 const express = require("express");
 const app = express();
 
+// mongoDb connect
 mongoose.connect(`${process.env.URI}`, {
   useUnifiedTopology: true,
   useNewUrlParser: true,
 });
 
+// PUG
 app.set("view engine", "pug");
 app.set("views", "./views");
 
+// express
 app.use(express.json());
 
 // Configuration
@@ -59,7 +62,15 @@ const validateCourse = (course) => {
 const courseSchema = new mongoose.Schema({
   name: { type: String, required: true, minlength: 5 },
   author: String,
-  tags: [String],
+  tags: {
+    type: Array,
+    validate: {
+      validator: function (v) {
+        return v && v.length > 0;
+      },
+      message: "A course should have at laeast one tag",
+    },
+  },
   date: { type: Date, default: Date.now },
   isPublished: Boolean,
   price: {
@@ -122,7 +133,7 @@ async function removeDocument(id) {
   console.log(result);
 }
 
-// createCourse();
-getCourses();
+createCourse();
+// getCourses();
 // updateCourse("5f2ff09662baf9184026e802");
 // removeDocument("5f2ff09662baf9184026e802");
