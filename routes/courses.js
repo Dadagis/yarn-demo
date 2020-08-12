@@ -1,6 +1,5 @@
-const mongoose = require("mongoose");
+const { Course, validateCourse } = require("../models/course");
 const express = require("express");
-const Joi = require("joi");
 const router = express.Router();
 
 // OLD "schema"
@@ -10,29 +9,10 @@ const router = express.Router();
 //   { id: 3, name: "course 3" },
 // ];
 
-const lessonSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    minlength: 5,
-    maxlength: 50,
-  },
-});
-
-const Course = mongoose.model("Lesson", lessonSchema);
-
 router.get("/", async (req, res) => {
   const courses = await Course.find().sort("name");
   res.send(courses);
 });
-
-const validateCourse = (course) => {
-  const schema = Joi.object({
-    name: Joi.string().min(3).required(),
-  });
-
-  return schema.validate(course);
-};
 
 router.get("/:id", async (req, res) => {
   // const course = courses.find((c) => c.id === parseInt(req.params.id));
