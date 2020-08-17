@@ -14,6 +14,7 @@ const config = require("config");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const logger = require("./middleware/logger");
+const error = require("./middleware/error");
 const home = require("./routes/home");
 const courses = require("./routes/courses");
 const customers = require("./routes/customers");
@@ -49,6 +50,8 @@ app.use("/api/courses", courses);
 app.use("/api/customers", customers);
 app.use("/api/users", users);
 app.use("/api/auth", auth);
+
+app.use(error);
 
 if (app.get("env") === "development") {
   startupDebugger("Mogran enabled");

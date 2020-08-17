@@ -11,9 +11,13 @@ const router = express.Router();
 //   { id: 3, name: "course 3" },
 // ];
 
-router.get("/", async (req, res) => {
-  const courses = await Course.find().sort("name");
-  res.send(courses);
+router.get("/", async (req, res, next) => {
+  try {
+    const courses = await Course.find().sort("name");
+    res.send(courses);
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.get("/:id", async (req, res) => {
