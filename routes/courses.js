@@ -1,3 +1,5 @@
+const auth = require("../middleware/auth");
+const admin = require("../middleware/admin");
 const { Course, validateCourse } = require("../models/course");
 const express = require("express");
 const router = express.Router();
@@ -24,7 +26,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   const { error } = validateCourse(req.body);
 
   if (error) {
@@ -48,7 +50,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   // const course = courses.find((c) => c.id === parseInt(req.params.id));
   const course = await Course.findById(req.params.id);
   if (!course) {
@@ -71,7 +73,7 @@ router.put("/:id", async (req, res) => {
   res.send(result);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", [auth, admin], async (req, res) => {
   // const course = courses.find((c) => c.id === parseInt(req.params.id));
   const course = await Course.findByIdAndRemove(req.params.id);
   if (!course) {
