@@ -1,3 +1,4 @@
+const asyncMiddleware = require("../middleware/async");
 const auth = require("../middleware/auth");
 const admin = require("../middleware/admin");
 const { Course, validateCourse } = require("../models/course");
@@ -11,71 +12,81 @@ const router = express.Router();
 //   { id: 3, name: "course 3" },
 // ];
 
-router.get("/", async (req, res, next) => {
-  try {
+router.get(
+  "/",
+  asyncMiddleware(async (req, res) => {
     const courses = await Course.find().sort("name");
     res.send(courses);
-  } catch (error) {
-    next(error);
-  }
-});
+  })
+);
 
-router.get("/:id", async (req, res) => {
-  // const course = courses.find((c) => c.id === parseInt(req.params.id));
-  const course = await Course.findById(req.params.id);
-  if (!course) {
-    res.status(404).send("The course with the given ID was not found !");
-  } else {
-    res.send(course);
-  }
-});
+router.get(
+  "/:id",
+  asyncMiddleware(async (req, res) => {
+    // const course = courses.find((c) => c.id === parseInt(req.params.id));
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      res.status(404).send("The course with the given ID was not found !");
+    } else {
+      res.send(course);
+    }
+  })
+);
 
-router.post("/", auth, async (req, res) => {
-  const { error } = validateCourse(req.body);
+router.post(
+  "/",
+  auth,
+  asyncMiddleware(async (req, res) => {
+    const { error } = validateCourse(req.body);
 
-  if (error) {
-    res
-      .status(400)
-      .send(
-        `Expected ${error.details[0].message} ; was "${error.details[0].context.value}"`
-      );
-    return;
-  }
+    if (error) {
+      res
+        .status(400)
+        .send(
+          `Expected ${error.details[0].message} ; was "${error.details[0].context.value}"`
+        );
+      return;
+    }
 
-  const course = new Course({
-    name: req.body.name,
-  });
+    const course = new Course({
+      name: req.body.name,
+    });
 
-  try {
+    try {
+      const result = await course.save();
+      res.send(result);
+    } catch (error) {
+      console.log(error.message);
+    }
+  })
+);
+
+router.put(
+  "/:id",
+  auth,
+  aysncMiddleware(async (req, res) => {
+    // const course = courses.find((c) => c.id === parseInt(req.params.id));
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      res.status(404).send("The course with the given ID was not found");
+      return;
+    }
+
+    const { error } = validateCourse(req.body);
+
+    if (error) {
+      res
+        .status(400)
+        .send(
+          `Expected ${error.details[0].message} ; was "${error.details[0].context.value}"`
+        );
+      return;
+    }
+    course.name = req.body.name;
     const result = await course.save();
     res.send(result);
-  } catch (error) {
-    console.log(error.message);
-  }
-});
-
-router.put("/:id", auth, async (req, res) => {
-  // const course = courses.find((c) => c.id === parseInt(req.params.id));
-  const course = await Course.findById(req.params.id);
-  if (!course) {
-    res.status(404).send("The course with the given ID was not found");
-    return;
-  }
-
-  const { error } = validateCourse(req.body);
-
-  if (error) {
-    res
-      .status(400)
-      .send(
-        `Expected ${error.details[0].message} ; was "${error.details[0].context.value}"`
-      );
-    return;
-  }
-  course.name = req.body.name;
-  const result = await course.save();
-  res.send(result);
-});
+  })
+);
 
 router.delete("/:id", [auth, admin], async (req, res) => {
   // const course = courses.find((c) => c.id === parseInt(req.params.id));
