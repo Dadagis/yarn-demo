@@ -20,6 +20,10 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "jest": "^26.4.0"
+    "jest": "^26.4.0",
+    "supertest": "^4.0.2"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }
