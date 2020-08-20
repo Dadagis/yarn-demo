@@ -1,13 +1,4 @@
 require("dotenv").config();
-// const MongoClient = require("mongodb").MongoClient;
-// const uri =
-//   "mongodb+srv://David:Azertyuiop*13@vidly.xwsex.gcp.mongodb.net/Vidly?retryWrites=true&w=majority";
-// const client = new MongoClient(uri, { useUnifiedTopology: true });
-// client.connect((err) => {
-//   const collection = client.db("test").collection("devices");
-//   // perform actions on the collection object
-//   client.close();
-// });
 const winston = require("winston");
 const mongoose = require("mongoose");
 const startupDebugger = require("debug")("app:startup");
@@ -15,14 +6,10 @@ const config = require("config");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const logger = require("./middleware/logger");
-const error = require("./middleware/error");
-const home = require("./routes/home");
-const courses = require("./routes/courses");
-const customers = require("./routes/customers");
-const users = require("./routes/users");
-const auth = require("./routes/auth");
 const express = require("express");
 const app = express();
+
+require("./startup/routes")(app);
 
 // mongoDb connect
 mongoose
@@ -37,22 +24,12 @@ mongoose
 app.set("view engine", "pug");
 app.set("views", "./views");
 
-// express
-app.use(express.json());
-
 // Configuration
 console.log(`Configuration name ${config.get("name")}`);
 console.log(`Mail server ${config.get("mail.host")}`);
 
 app.use(logger);
 app.use(helmet());
-app.use("/", home);
-app.use("/api/courses", courses);
-app.use("/api/customers", customers);
-app.use("/api/users", users);
-app.use("/api/auth", auth);
-
-app.use(error);
 
 if (app.get("env") === "development") {
   startupDebugger("Mogran enabled");
