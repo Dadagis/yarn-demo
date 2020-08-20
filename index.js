@@ -1,6 +1,5 @@
 require("dotenv").config();
 const winston = require("winston");
-const mongoose = require("mongoose");
 const startupDebugger = require("debug")("app:startup");
 const config = require("config");
 const helmet = require("helmet");
@@ -10,15 +9,7 @@ const express = require("express");
 const app = express();
 
 require("./startup/routes")(app);
-
-// mongoDb connect
-mongoose
-  .connect(`${process.env.URI}`, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-  })
-  .then(() => console.log("Connected to MongoDb"))
-  .catch(() => console.log("Could not connect to DataBase"));
+require("./startup/db")();
 
 // PUG
 app.set("view engine", "pug");
