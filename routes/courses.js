@@ -64,7 +64,7 @@ router.post(
 router.put(
   "/:id",
   auth,
-  aysncMiddleware(async (req, res) => {
+  asyncMiddleware(async (req, res) => {
     // const course = courses.find((c) => c.id === parseInt(req.params.id));
     const course = await Course.findById(req.params.id);
     if (!course) {

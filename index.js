@@ -10,6 +10,7 @@ const app = express();
 
 require("./startup/routes")(app);
 require("./startup/db")();
+require("./startup/config")();
 
 // PUG
 app.set("view engine", "pug");
